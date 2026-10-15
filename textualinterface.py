@@ -39,7 +39,7 @@ class TetrisApp(App):
         yield Grid(id="board")
         yield Footer()
 
-    async def on_button_pressed(self, event: Button.Pressed) -> None:
+    def on_button_pressed(self, event: Button.Pressed) -> None:
         rows = self.query_one("#rows", Select)
         cols = self.query_one("#cols", Select)
         if rows.is_blank() or cols.is_blank():
@@ -54,7 +54,7 @@ class TetrisApp(App):
         board = self.query_one("#board")
         board.styles.grid_size_columns = cols.value
         board.styles.grid_size_rows = rows.value
-        await board.mount_all(cell for row in self.cells for cell in row)
+        board.mount_all(cell for row in self.cells for cell in row)
 
         self.query_one("#controls").display = False
         self.refresh_board()
