@@ -3,7 +3,7 @@ import sys
 _ROWS = 10
 _COLUMNS = 5
 _INTERVAL = 0.3
-_BLANK = "  "
+_BLANK = ""
 _BLOCK = "\u2588\u2588"
 import time
 import random
@@ -28,7 +28,7 @@ def drop_block(grid):
         grid[current_dropping_block[0]][current_dropping_block[1]] = current_dropping_block[2]
         current_dropping_block[0] = -1
         current_dropping_block[1] = -1
-    elif grid[current_dropping_block[0]][current_dropping_block[1] + 1] == _BLOCK:
+    elif grid[current_dropping_block[0]][current_dropping_block[1] + 1] != _BLANK:
         grid[current_dropping_block[0]][current_dropping_block[1]] = current_dropping_block[2]
         current_dropping_block[0] = -1
         current_dropping_block[1] = -1
@@ -67,7 +67,7 @@ def check_for_filled_row(grid):
     numBlocks = 0
     for x in range(_ROWS):
         for y in range(_COLUMNS):
-            if grid[y][x] == _BLOCK:
+            if grid[y][x] != _BLANK:
                 numBlocks += 1
             if numBlocks == _COLUMNS:
                 remove_column(x, y, grid)
@@ -119,7 +119,5 @@ def show_dropping_block(grid):
 def check_cell_state(x, y, grid):
     if current_dropping_block[0] == x and current_dropping_block[1] == y:
         return current_dropping_block[2]
-    elif grid[x][y] == _BLOCK:
-        return colours[1]
     else:
-        return colours[0]
+        return grid[x][y]
