@@ -1,0 +1,22 @@
+Screen {
+    layout: grid;
+    grid-columns: 2;
+    grid-rows: 2;
+    grid-gutter: 0;
+    align: center middle;
+}
+
+Cell {
+    background: $surface;
+    height: 2;
+    width: 100%;
+    border: solid green;
+}
+
+Cell.filled {
+    background: green;
+}
+
+Select {
+    width: 1;
+}
