@@ -1,9 +1,5 @@
 Screen {
-    layout: grid;
-    grid-columns: 2;
-    grid-rows: 2;
-    grid-gutter: 0;
-    align: center middle;
+
 }
 
 Cell {
@@ -17,6 +13,17 @@ Cell.filled {
     background: green;
 }
 
-Select {
-    width: 1;
+#controls {
+    height: auto;
+}
+#controls Select {
+    width: 20;
+}
+
+#board {
+    align: center middle;
+    layout: grid;
+    grid-columns: 2;
+    grid-rows: 2;
+    grid-gutter: 0;
 }

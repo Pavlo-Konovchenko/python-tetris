@@ -29,7 +29,7 @@ def process_on_press(key):
 #listener.start()
 
 def main():
-    textualinterface.start(grid)
+    textualinterface.start()
     # game_loop()
 
 

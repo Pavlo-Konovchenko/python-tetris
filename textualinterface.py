@@ -1,13 +1,12 @@
 from time import monotonic
 
+import tetrisplay
 from textual.app import App, ComposeResult
+from textual.containers import Grid, Horizontal
 from textual.color import Color
 from textual.reactive import reactive
 from textual.widgets import Button, Digits, Footer, Header, Static, Select
 from tetrisplay import check_cell_state, check_for_game_over, drop_block, move_block, check_for_filled_row, _INTERVAL
-from tetrisplay import _ROWS, _COLUMNS
-
-saved_grid = None
 
 class Cell(Static):
     filled = reactive(False)
@@ -29,30 +28,45 @@ class TetrisApp(App):
         ("right", "move(1)", "Right"),
     ]
 
+    grid = None
+
     def compose(self) -> ComposeResult:
-        """Called to add widgets to the app."""
         yield Header()
+        with Horizontal(id="controls"):
+            yield Select(((str(n), n) for n in range(4, 31)), prompt="Rows", id="rows")
+            yield Select(((str(n), n) for n in range(4, 21)), prompt="Columns", id="cols")
+            yield Button("Start", id="start", variant="success")
+        yield Grid(id="board")
         yield Footer()
 
-        self.cells = [[Cell() for x in range(_COLUMNS)] for y in range(_ROWS)]
-        for row in self.cells:
-            yield from row
+    async def on_button_pressed(self, event: Button.Pressed) -> None:
+        rows = self.query_one("#rows", Select)
+        cols = self.query_one("#cols", Select)
+        if rows.is_blank() or cols.is_blank():
+            self.notify("Pick both a row and a column count", severity="error")
+            return
 
-        # yield Select((str(number), number) for number in range(20))
+        tetrisplay._ROWS = rows.value
+        tetrisplay._COLUMNS = cols.value
+        self.grid = tetrisplay.build_clean_grid()
 
-    def on_mount(self) -> None:
-        self.screen.styles.grid_size_columns = _COLUMNS
-        self.screen.styles.grid_size_rows = _ROWS
+        self.cells = [[Cell() for _ in range(cols.value)] for _ in range(rows.value)]
+        board = self.query_one("#board")
+        board.styles.grid_size_columns = cols.value
+        board.styles.grid_size_rows = rows.value
+        await board.mount_all(cell for row in self.cells for cell in row)
+
+        self.query_one("#controls").display = False
         self.refresh_board()
         self.timer = self.set_interval(_INTERVAL, self.game_loop)
 
     def game_loop(self) -> None:
-        if check_for_game_over(saved_grid):
+        if check_for_game_over(self.grid):
             self.timer.stop()
             self.notify("Game Over")
             return
-        drop_block(saved_grid)
-        check_for_filled_row(saved_grid)
+        drop_block(self.grid)
+        check_for_filled_row(self.grid)
         self.refresh_board()
 
 
@@ -63,20 +77,15 @@ class TetrisApp(App):
         )
 
     def action_move(self, direction:int) -> None:
-        move_block(saved_grid, direction)
+        if self.grid is None:
+            return
+        move_block(self.grid, direction)
         self.refresh_board()
 
     def refresh_board(self) -> None:
-        for x in range(10):
-            for y in range(5):
-                self.cells[x][y].colour = cell_state(y, x)
+        for row in range(len(self.cells)):
+            for col in range(len(self.cells[0])):
+                self.cells[row][col].colour = check_cell_state(col, row, self.grid)
 
-def start(grid):
-    app = TetrisApp()
-    global saved_grid
-    saved_grid = grid
-    app.run()
-
-
-def cell_state(x, y):
-    return check_cell_state(x, y, saved_grid)
+def start():
+    TetrisApp().run()
