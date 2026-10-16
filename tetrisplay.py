@@ -55,13 +55,17 @@ def check_for_game_over(grid):
     block_num = 0
     global game_over
     for c in range(_COLUMNS):
-        if grid[c][0] == _BLOCK:
+        if grid[c][0] != _BLANK:
             block_num += 1
     if block_num == _COLUMNS:
         game_over = True
         return True
     game_over = False
     return False
+
+def force_game_over(grid):
+    for c in range(_COLUMNS):
+        grid[c][0] = colours[5]
 
 def check_for_filled_row(grid):
     numBlocks = 0

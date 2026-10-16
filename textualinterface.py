@@ -25,6 +25,7 @@ class TetrisApp(App):
         ("d", "toggle_dark", "Toggle dark mode"),
         ("left", "move(-1)", "Left"),
         ("right", "move(1)", "Right"),
+        ("c", "end_game", "End Game"),
     ]
 
     grid = None
@@ -64,6 +65,7 @@ class TetrisApp(App):
 
     def game_loop(self) -> None:
         if check_for_game_over(self.grid):
+            self.clock_timer.stop()
             self.timer.stop()
             self.notify("Game Over")
             return
@@ -88,6 +90,9 @@ class TetrisApp(App):
             return
         move_block(self.grid, direction)
         self.refresh_board()
+
+    def action_end_game(self) -> None:
+        tetrisplay.force_game_over(self.grid)
 
     def refresh_board(self) -> None:
         for row in range(len(self.cells)):
