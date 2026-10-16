@@ -3,7 +3,6 @@ from time import monotonic
 import tetrisplay
 from textual.app import App, ComposeResult
 from textual.containers import Grid, Horizontal
-from textual.color import Color
 from textual.reactive import reactive
 from textual.widgets import Button, Digits, Footer, Header, Static, Select
 from tetrisplay import check_cell_state, check_for_game_over, drop_block, move_block, check_for_filled_row, _INTERVAL
@@ -36,6 +35,7 @@ class TetrisApp(App):
             yield Select(((str(n), n) for n in range(4, 31)), prompt="Rows", id="rows")
             yield Select(((str(n), n) for n in range(4, 21)), prompt="Columns", id="cols")
             yield Button("Start", id="start", variant="success")
+        yield Digits("00:00", id="clock")
         yield Grid(id="board")
         yield Footer()
 
@@ -58,6 +58,8 @@ class TetrisApp(App):
 
         self.query_one("#controls").display = False
         self.refresh_board()
+        self.start_time = monotonic()
+        self.clock_timer = self.set_interval(0.1, self.update_clock)
         self.timer = self.set_interval(_INTERVAL, self.game_loop)
 
     def game_loop(self) -> None:
@@ -68,6 +70,11 @@ class TetrisApp(App):
         drop_block(self.grid)
         check_for_filled_row(self.grid)
         self.refresh_board()
+
+    def update_clock(self) -> None:
+        elapsed = monotonic() - self.start_time
+        minutes, seconds = divmod(int(elapsed), 60)
+        self.query_one("#clock", Digits).update(f"{minutes:02}:{seconds:02}")
 
 
     def action_toggle_dark(self) -> None:
