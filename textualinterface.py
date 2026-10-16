@@ -4,7 +4,7 @@ import tetrisplay
 from textual.app import App, ComposeResult
 from textual.containers import Grid, Horizontal
 from textual.reactive import reactive
-from textual.widgets import Button, Digits, Footer, Header, Static, Select
+from textual.widgets import Button, Digits, Footer, Header, Static, Select, Input
 from tetrisplay import check_cell_state, check_for_game_over, drop_block, move_block, check_for_filled_row, _INTERVAL
 
 class Cell(Static):
@@ -33,6 +33,7 @@ class TetrisApp(App):
     def compose(self) -> ComposeResult:
         yield Header()
         with Horizontal(id="controls"):
+            yield Input(placeholder="Your name", id="name")
             yield Select(((str(n), n) for n in range(4, 31)), prompt="Rows", id="rows")
             yield Select(((str(n), n) for n in range(4, 21)), prompt="Columns", id="cols")
             yield Button("Start", id="start", variant="success")
@@ -46,6 +47,13 @@ class TetrisApp(App):
         if rows.is_blank() or cols.is_blank():
             self.notify("Pick both a row and a column count", severity="error")
             return
+
+        name = self.query_one("#name", Input).value.strip()
+        if not name:
+            self.notify("Enter your name", severity="error")
+            return
+        self.player_name = name
+        self.sub_title = f"Player: {self.player_name}"
 
         tetrisplay._ROWS = rows.value
         tetrisplay._COLUMNS = cols.value

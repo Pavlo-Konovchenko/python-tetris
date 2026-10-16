@@ -19,6 +19,9 @@ Cell.filled {
 #controls Select {
     width: 20;
 }
+#controls Input {
+    width: 24;
+}
 
 #board {
     align: center middle;
